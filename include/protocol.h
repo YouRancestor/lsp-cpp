@@ -268,6 +268,81 @@ NLOHMANN_JSON_SERIALIZE_ENUM(FailureHandlingKind, {
     {FailureHandlingKind::TextOnlyTransactional, "textOnlyTransactional"}
 })
 
+struct CodeActionClientCapabilities
+{
+    /**
+     * Whether code action supports dynamic registration.
+     */
+    bool DynamicRegistration = true;
+
+    /**
+     * The code action kind values the client supports. When this
+     * property exists the client also guarantees that it will
+     * handle values outside its set gracefully and falls back
+     * to a default value when unknown.
+     */
+    std::vector<std::string> CodeActionKinds;
+
+    /**
+     * Whether code action supports the `isPreferred` property.
+     *
+     * @since 3.15.0
+     */
+    bool IsPreferredSupport = true;
+
+    /**
+     * Whether code action supports the `disabled` property.
+     *
+     * @since 3.16.0
+     */
+    bool DisabledSupport = true;
+
+    /**
+     * Whether code action supports the `data` property which is
+     * preserved between a `textDocument/codeAction` and a
+     * `codeAction/resolve` request.
+     *
+     * @since 3.16.0
+     */
+    bool DataSupport = true;
+
+    /**
+     * Whether the client supports resolving additional code action
+     * properties via a separate `codeAction/resolve` request.
+     *
+     * @since 3.16.0
+     */
+    std::vector<std::string> ResolveProperties = {"edit"};
+
+    /**
+     * Whether the client honors the change annotations in
+     * text edits and resource operations returned via the
+     * `CodeAction#edit` property by for example presenting
+     * the workspace edit in the user interface and asking
+     * for confirmation.
+     *
+     * @since 3.16.0
+     */
+    bool HonorsChangeAnnotations = false;
+};
+JSON_SERIALIZE(CodeActionClientCapabilities,
+    MAP_JSON(
+        MAP_TO("dynamicRegistration", DynamicRegistration),
+        MAP_KV("codeActionLiteralSupport",
+            MAP_KV("codeActionKind",
+                MAP_TO("valueSet", CodeActionKinds)
+            )
+        ),
+        MAP_TO("isPreferredSupport", IsPreferredSupport),
+        MAP_TO("disabledSupport", DisabledSupport),
+        MAP_TO("dataSupport", DataSupport),
+        MAP_KV("resolveSupport",
+            MAP_TO("properties", ResolveProperties)
+        ),
+        MAP_TO("honorsChangeAnnotations", HonorsChangeAnnotations)
+    ), {}
+);
+
 struct ClientCapabilities {
     /// The supported set of SymbolKinds for workspace/symbol.
     /// workspace.symbol.symbolKind.valueSet
@@ -308,7 +383,13 @@ struct ClientCapabilities {
 
     /// Client supports CodeAction return value for textDocument/codeAction.
     /// textDocument.codeAction.codeActionLiteralSupport.
-    bool CodeActionStructure = true;
+    //bool CodeActionStructure = true;
+
+    /**
+     * Capabilities specific to the `textDocument/codeAction` request.
+     */
+    CodeActionClientCapabilities CodeAction;
+
     /// Supported encodings for LSP character offsets. (clangd extension).
     std::vector<OffsetEncoding> offsetEncoding = {OffsetEncoding::UTF8};
     /// The content format that should be used for Hover requests.
@@ -339,7 +420,7 @@ JSON_SERIALIZE(ClientCapabilities,MAP_JSON(
                         MAP_KV("completionItemKind", MAP_TO("valueSet", CompletionItemKinds)),
                         MAP_TO("editsNearCursor", CompletionFixes)
                 ),
-                MAP_KV("codeAction", MAP_TO("codeActionLiteralSupport", CodeActionStructure)),
+                MAP_KV("codeAction", MAP_TO("codeAction", CodeAction)),
                 MAP_KV("documentSymbol", MAP_TO("hierarchicalDocumentSymbolSupport", HierarchicalDocumentSymbol)),
                 MAP_KV("hover",  //HoverClientCapabilities
                         MAP_TO("contentFormat", HoverContentFormat)),

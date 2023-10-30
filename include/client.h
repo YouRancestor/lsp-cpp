@@ -17,6 +17,10 @@ public:
         params.rootUri = rootUri;
         return SendRequest("initialize", params);
     }
+    RequestID Initialize(InitializeParams params) {
+        return SendRequest("initialize", params);
+    }
+
     RequestID Shutdown() {
         return SendRequest("shutdown");
     }
