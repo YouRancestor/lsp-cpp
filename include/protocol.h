@@ -143,7 +143,7 @@ struct TextDocumentItem {
     string_ref languageId;
 
     /// The version number of this document (it will strictly increase after each
-    int version = 0;
+    int version = 1;
 
     /// The content of the opened text document.
     string_ref text;
