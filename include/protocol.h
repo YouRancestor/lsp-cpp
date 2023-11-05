@@ -580,7 +580,7 @@ struct DidChangeTextDocumentParams {
     /// The document that did change. The version number points
     /// to the version after all provided content changes have
     /// been applied.
-    TextDocumentIdentifier textDocument;
+    VersionedTextDocumentIdentifier textDocument;
 
     /// The actual content changes.
     std::vector<TextDocumentContentChangeEvent> contentChanges;

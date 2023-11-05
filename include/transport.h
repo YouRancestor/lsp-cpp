@@ -9,7 +9,7 @@
 #include <functional>
 #include <utility>
 using value = json;
-using RequestID = std::string;
+using RequestID = unsigned int;
 
 class MessageHandler {
 public:

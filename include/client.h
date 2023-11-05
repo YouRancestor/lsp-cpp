@@ -9,6 +9,9 @@
 #include "windows.h"
 class LanguageClient : public JsonTransport {
 public:
+    LanguageClient() : id(0)
+    {
+    }
     virtual ~LanguageClient() = default;
 public:
     RequestID Initialize(option<DocumentUri> rootUri = {}) {
@@ -36,16 +39,23 @@ public:
     RequestID RegisterCapability() {
         return SendRequest("client/registerCapability");
     }
+    std::map<std::string, unsigned int> mapUriVersion;
     void DidOpen(DocumentUri uri, string_ref text, string_ref languageId = "cpp") {
+        if (mapUriVersion.find(uri.str()) == mapUriVersion.end())
+        {
+            mapUriVersion.insert({ uri.str(), 0 });
+        }
         DidOpenTextDocumentParams params;
         params.textDocument.uri = std::move(uri);
         params.textDocument.text = text;
         params.textDocument.languageId = languageId;
+        params.textDocument.version = ++mapUriVersion[uri.str()];
         SendNotify("textDocument/didOpen", params);
     }
     void DidClose(DocumentUri uri) {
         DidCloseTextDocumentParams params;
         params.textDocument.uri = std::move(uri);
+        mapUriVersion.erase(uri.str());
         SendNotify("textDocument/didClose", params);
     }
     void DidChange(DocumentUri uri, std::vector<TextDocumentContentChangeEvent> &changes,
@@ -54,6 +64,7 @@ public:
         params.textDocument.uri = std::move(uri);
         params.contentChanges = std::move(changes);
         params.wantDiagnostics = wantDiagnostics;
+        params.textDocument.version = ++mapUriVersion[uri.str()];
         SendNotify("textDocument/didChange", params);
     }
     RequestID RangeFomatting(DocumentUri uri, Range range) {
@@ -195,13 +206,15 @@ public:
     }
 public:
     RequestID SendRequest(string_ref method, value params = json()) {
-        RequestID id = method.str();
+        RequestID id = this->id++;
         request(method, params, id);
         return id;
     }
     void SendNotify(string_ref method, value params = json()) {
         notify(method, params);
     }
+private:
+    RequestID id;
 };
 class ProcessLanguageClient : public LanguageClient {
 public:
