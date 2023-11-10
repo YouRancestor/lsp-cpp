@@ -22,18 +22,18 @@ public:
 };
 class MapMessageHandler : public MessageHandler {
 public:
-    std::map<std::string, std::function<void(value &, RequestID)>> m_calls;
+    std::map<std::string, std::function<void(value &, value &)>> m_calls;
     std::map<std::string, std::function<void(value &)>> m_notify;
     std::vector<std::pair<RequestID, std::function<void(value &)>>> m_requests;
     MapMessageHandler() = default;
     template<typename Param>
-    void bindRequest(const char *method, std::function<void(Param &, RequestID)> func) {
+    void bindRequest(const char *method, std::function<void(Param &, value&)> func) {
         m_calls[method] = [=](json &params, json &id) {
             Param param = params.get<Param>();
-            func(param, id.get<RequestID>());
+            func(param, id);
         };
     }
-    void bindRequest(const char *method, std::function<void(value &, RequestID)> func) {
+    void bindRequest(const char *method, std::function<void(value &, value&)> func) {
         m_calls[method] = std::move(func);
     }
     template<typename Param>
@@ -65,7 +65,9 @@ public:
         }
     }
     void onError(value &ID, value &error) override {
-
+        printf("Error: request %d failed with error \"%s\"",
+            int(ID), error.dump().c_str()
+        );
     }
     void onRequest(string_ref method, value &params, value &ID) override {
         std::string string = method.str();
@@ -102,11 +104,13 @@ public:
                         if (value.contains("params")) {
                             handler.onNotify(value["method"].get<std::string>(), value["params"]);
                         }
+                    } else {
+                        printf("Error: %s.\n", value.dump().c_str());
                     }
                 }
             } catch (std::exception &e) {
 
-                //printf("error -> %s\n", e.what());
+                printf("error -> %s\n", e.what());
             }
         }
         return 0;
