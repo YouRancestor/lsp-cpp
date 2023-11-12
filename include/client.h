@@ -213,6 +213,11 @@ public:
     void SendNotify(string_ref method, value params = json()) {
         notify(method, params);
     }
+protected:
+    RequestID NextID() {
+        return id;
+    }
+
 private:
     RequestID id;
 };
