@@ -329,7 +329,7 @@ public:
         try {
             json = json::parse(read);
         } catch (std::exception &e) {
-            //printf("read error -> %s\nread -> %s\n ", e.what(), read.c_str());
+            printf("read error -> %s\nread -> %s\n ", e.what(), read.c_str());
         }
         //printf("message %d:\n%s\n", length, read.c_str());
         return true;
