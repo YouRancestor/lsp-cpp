@@ -14,6 +14,7 @@ using RequestID = unsigned int;
 class MessageHandler {
 public:
     MessageHandler() = default;
+    virtual ~MessageHandler() = default;
     virtual void onNotify(string_ref method, value &params) {}
     virtual void onResponse(value &ID, value &result) {}
     virtual void onError(value &ID, value &error) {}
