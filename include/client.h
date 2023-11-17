@@ -260,12 +260,18 @@ public:
         CloseHandle(fWriteIn);
         CloseHandle(fReadOut);
         CloseHandle(fWriteOut);
+        WaitForSingleObject(fReadIn, INFINITE);
+        WaitForSingleObject(fWriteIn, INFINITE);
+        WaitForSingleObject(fReadOut, INFINITE);
+        WaitForSingleObject(fWriteOut, INFINITE);
         if (!TerminateProcess(fProcess.hProcess, 0)) {
             printf("teminate process error!\n");
         }
         if (!TerminateThread(fProcess.hThread, 0)) {
             printf("teminate thread error!\n");
         }
+        WaitForSingleObject(fProcess.hProcess, INFINITE);
+        WaitForSingleObject(fProcess.hThread, INFINITE);
         CloseHandle(fProcess.hThread);
         CloseHandle(fProcess.hProcess);
     }
