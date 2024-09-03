@@ -311,7 +311,7 @@ public:
     bool Write(std::string &in) {
         DWORD hasWritten;
         int writeSize = 0;
-        int totalSize = in.length();
+        int totalSize = (int)in.length();
         while (WriteFile(fWriteIn, &in[writeSize], totalSize, &hasWritten, 0)) {
             writeSize += hasWritten;
             if (writeSize >= totalSize) {
